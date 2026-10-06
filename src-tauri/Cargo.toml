@@ -1,6 +1,6 @@
 [package]
 name = "desksort"
-version = "0.1.0"
+version = "0.1.1"
 description = "DeskSort - 轻量桌面管理工具"
 authors = ["DeskSort"]
 edition = "2021"
