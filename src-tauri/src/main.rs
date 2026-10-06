@@ -83,21 +83,22 @@ fn glyph_for(path: &std::path::Path) -> &'static str {
     }
 }
 
-fn data_dir(app: &AppHandle) -> PathBuf {
-    let dir = app.path().app_data_dir().expect("无法获取应用数据目录");
-    fs::create_dir_all(&dir).ok();
-    dir
+fn data_dir(app: &AppHandle) -> Option<PathBuf> {
+    let dir = app.path().app_data_dir().ok()?;
+    fs::create_dir_all(&dir).ok()?;
+    Some(dir)
 }
 
 fn load_json<T: for<'de> Deserialize<'de>>(app: &AppHandle, name: &str) -> Option<T> {
-    fs::read_to_string(data_dir(app).join(name))
+    let dir = data_dir(app)?;
+    fs::read_to_string(dir.join(name))
         .ok()
         .and_then(|s| serde_json::from_str(&s).ok())
 }
 
 fn save_json(app: &AppHandle, name: &str, v: &impl Serialize) {
-    if let Ok(s) = serde_json::to_string_pretty(v) {
-        fs::write(data_dir(app).join(name), s).ok();
+    if let (Some(dir), Ok(s)) = (data_dir(app), serde_json::to_string_pretty(v)) {
+        fs::write(dir.join(name), s).ok();
     }
 }
 

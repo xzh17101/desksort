@@ -151,36 +151,50 @@ let nextId = 1;
 
 const $ = s => document.querySelector(s);
 
+/* ---------------- 数据加载 ---------------- */
+const FALLBACK_CATS = [
+  {id:"c0", name:"工作文档", color:"#5b8cff"},
+  {id:"c1", name:"图片",     color:"#3ddc97"},
+  {id:"c2", name:"影音娱乐", color:"#ff6b9d"},
+  {id:"c3", name:"应用程序", color:"#7c5bff"},
+  {id:"c4", name:"压缩包",   color:"#ffb547"},
+  {id:"c5", name:"其他",     color:"#4dd0e1"},
+];
+
 async function loadData(){
-  if(isTauri){
-    const [c, items] = await invoke("scan_desktop");
-    cats = c;
-    icons = items.map((it, i)=>({ id: i+1, name: it.name, path: it.path,
-      glyph: it.glyph, cat: it.cat }));
-    $("#memText").textContent = "已连接本机桌面";
-  }else{
-    $("#modeTip").style.display = "inline-block";
-    $("#memText").textContent = "预览模式";
-    cats = [
-      {id:"c0", name:"工作文档", color:"#5b8cff"},
-      {id:"c1", name:"图片",     color:"#3ddc97"},
-      {id:"c2", name:"影音娱乐", color:"#ff6b9d"},
-      {id:"c3", name:"应用程序", color:"#7c5bff"},
-      {id:"c4", name:"压缩包",   color:"#ffb547"},
-      {id:"c5", name:"其他",     color:"#4dd0e1"},
-    ];
-    const demo = [
-      ["年度报告.pdf","📕","c0"],["会议纪要.txt","📄","c0"],["数据表.xlsx","📊","c0"],
-      ["截图 2026.png","🖼️","c1"],["头像.webp","🖼️","c1"],
-      ["电影合集.mp4","🎬","c2"],["歌单.mp3","🎵","c2"],
-      ["Chrome.lnk","🔗","c3"],["微信.lnk","🔗","c3"],["Steam.exe","⚙️","c3"],
-      ["资料备份.zip","📦","c4"],
-      ["项目文件夹","📁","c5"],["待整理.txt","📄","c5"],
-    ];
-    icons = demo.map(([name,glyph,cat],i)=>({id:i+1, name, path:name, glyph, cat}));
+  try{
+    if(isTauri){
+      const [c, items] = await invoke("scan_desktop");
+      cats = c;
+      icons = items.map((it, i)=>({ id: i+1, name: it.name, path: it.path,
+        glyph: it.glyph, cat: it.cat }));
+      $("#memText").textContent = "已连接本机桌面";
+    }else{
+      $("#modeTip").style.display = "inline-block";
+      $("#memText").textContent = "预览模式";
+      cats = [...FALLBACK_CATS];
+      const demo = [
+        ["年度报告.pdf","📕","c0"],["会议纪要.txt","📄","c0"],["数据表.xlsx","📊","c0"],
+        ["截图 2026.png","🖼️","c1"],["头像.webp","🖼️","c1"],
+        ["电影合集.mp4","🎬","c2"],["歌单.mp3","🎵","c2"],
+        ["Chrome.lnk","🔗","c3"],["微信.lnk","🔗","c3"],["Steam.exe","⚙️","c3"],
+        ["资料备份.zip","📦","c4"],
+        ["项目文件夹","📁","c5"],["待整理.txt","📄","c5"],
+      ];
+      icons = demo.map(([name,glyph,cat],i)=>({id:i+1, name, path:name, glyph, cat}));
+    }
+  }catch(e){
+    // 后端调用失败：显示错误原因，并用默认分类兜底，保证界面可用
+    const msg = (e && e.message) ? e.message : String(e);
+    toast("⚠️ 加载桌面失败：" + msg);
+    $("#memText").textContent = "后端错误";
+    if(cats.length === 0) cats = [...FALLBACK_CATS];
   }
   render();
 }
+
+/* ---------------- 渲染 ---------------- */
+function catColor(id){ const c = cats.find(x=>x.id===id); return c?c.color:"#5b8cff"; }
 
 function renderSidebar(){
   const list = [{id:"all",name:"全部项目",color:"#e8ecf5"},...cats];
