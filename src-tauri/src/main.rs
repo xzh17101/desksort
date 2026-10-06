@@ -129,7 +129,7 @@ fn scan_desktop(app: AppHandle) -> (Vec<CatDef>, Vec<Item>) {
                 items.push(Item {
                     name,
                     path: path_str,
-                    glyph: glyph_for(&p),
+                    glyph: glyph_for(&p).to_string(),
                     cat,
                 });
             }
