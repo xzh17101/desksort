@@ -138,6 +138,9 @@
 <div id="toast"></div>
 
 <script>
+/* 注意：Tauri 注入脚本会在全局作用域声明 isTauri 等变量，
+   应用脚本整体放入块级作用域，避免与注入的全局声明冲突 */
+{
 const isTauri = !!(window.__TAURI__ && window.__TAURI__.core);
 const invoke = isTauri ? window.__TAURI__.core.invoke : null;
 
@@ -317,6 +320,7 @@ function toast(msg){
 }
 
 loadData();
+}
 </script>
 </body>
 </html>
