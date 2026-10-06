@@ -1,10 +1,13 @@
 """在 CI 中生成 DeskSort 应用图标（1024x1024 PNG）。
 用法：python scripts/gen_icon.py
 """
+import os
+
 from PIL import Image, ImageDraw
 
 
 def main():
+    os.makedirs("src-tauri/icons", exist_ok=True)
     s = 1024
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     base = Image.new("RGBA", (s, s), (0, 0, 0, 0))
